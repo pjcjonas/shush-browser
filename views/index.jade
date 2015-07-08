@@ -1,0 +1,98 @@
+doctype html
+html(lang="en")
+    head
+        title SERIES
+        link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css')
+        link(rel='stylesheet', href='/styles.css')
+        script(type='text/javascript', src='//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js')
+        script(type='text/javascript', src='/jwplayer.js')
+        script(type='text/javascript', src='http://jwpsrv.com/library/HCzmxY7N8xnoXTynv8E0PwMogPs1Eo8WyOPNBQ==.js')
+        script(type='text/javascript', src='/flash_detect.js')
+
+    body
+        div(id="playerload")
+        div.seriesList
+            ul
+                each serie in series
+                    if serie.title && serie.link
+                        li.seeEpisodes(data-link="http://www.shush.se/#{serie.link}", id="#{serie._id}", style="background-image:url(#{serie.img})")
+                            div.seriesTitleHolder #{serie.title}
+                        li(class="epis episodes#{serie._id}")
+        script(type='text/javascript').
+            $(function(){
+
+                $('.seriesTitleHolder').mouseover('', function(){
+                    $(this).stop().animate({height:120},300)
+                }).mouseout('', function(){
+                    $(this).stop().animate({height:50},300)
+                });
+
+                var selectedLi = '';
+                $('.seeEpisodes').on('click', function(event){
+
+                    var btn = $(this);
+
+                    btn.append('<div class="pull-right preload">LOADING EPISODES</div>');
+
+                    selectedLi = btn.attr('id');
+
+                    $.ajax({
+                        method: "POST",
+                        url: "/getepisodes",
+                        data: {url:btn.data('link')},
+                        dataType:'json'
+                    }).done(function (response) {
+
+                        var listHtml = '';
+
+                        listHtml += '<ul class="epis">';
+
+                        $.each(response, function(index,value){
+                            listHtml += '<li class="viewEpisode" data-id="'+selectedLi+'" data-url="http://www.shush.se/'+value.link+'">'+value.title+'</li>';
+                        });
+
+                        listHtml += '</ul>';
+
+                        $('.epis').empty();
+                        $('.episodes'+selectedLi).html(listHtml);
+                        $('.preload').remove();
+
+                        $('body').stop().animate({scrollTop:$('#'+btn.attr('id')).offset().top}, '500', 'swing');
+
+                        initViewEpisodeLinks();
+
+                    });
+                });
+
+                function initViewEpisodeLinks(){
+
+                    $('.viewEpisode').unbind().on('click', function(event){
+
+                        var btn = $(this);
+
+                        $('#playerload').empty();
+
+                        window.open(btn.data('url'));
+
+                        /*$.ajax({
+                            method: "POST",
+                            url: "/loadepisode",
+                            data: {url:btn.data('url')},
+                            dataType:'html'
+                        }).done(function (response) {
+                            if($('#flashdata').length > 0){
+                             $('#flashdata').remove();
+                             $('#playerload').empty();
+                             }
+                             $('body').append('<div id="flashdata">'+response+'</div>');
+
+                            response
+
+                        });*/
+
+                    });
+
+                }
+
+            });
+
