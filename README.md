@@ -1,2 +1,3 @@
-# shush-browser
-shush-browser
+### Shush Browser
+
+A simple Node.Js app the scrapes data from Shush.se and uses ajax to list data and view episodes. I wrote this as I was sick and tired of the popups that present them selves when clicking on content...
